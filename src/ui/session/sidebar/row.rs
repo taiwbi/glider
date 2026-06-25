@@ -603,7 +603,7 @@ fn sender_label(message: model::Message) -> Option<String> {
     // Just use a sender label for specific messages.
     match message.content().0 {
         MessageText(_) | MessageLocation(_) | MessageSticker(_) | MessagePhoto(_)
-        | MessageAudio(_) | MessageAnimation(_) | MessageVideo(_) | MessageDocument(_)
+        | MessageAudio(_) | MessageAnimation(_) | MessageVideo(_) | MessageVideoNote(_) | MessageDocument(_)
         | MessageVoiceNote(_) | MessageCall(_) | MessageVenue(_) => {}
         _ => return None,
     }
@@ -655,6 +655,7 @@ fn message_thumbnail_texture(message: model::Message) -> Option<gdk::Texture> {
         MessageDocument(data) => data.document.minithumbnail,
         MessagePhoto(data) => data.photo.minithumbnail,
         MessageVideo(data) => data.video.minithumbnail,
+        MessageVideoNote(data) => data.video_note.minithumbnail,
         _ => None,
     }
     .map(|thumbnail| {

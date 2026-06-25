@@ -515,3 +515,22 @@ splitbutton.small-pill:dir(ltr) > menubutton > button {
   border-top-right-radius: 18px;
   border-bottom-right-radius: 18px;
 }
+
+messagebubble.video-note {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 9999px;
+}
+
+messagebubble.video-note > box {
+  padding: 0;
+}
+
+messagebubble.video-note mediapicture {
+  border-radius: 9999px;
+  min-width: 240px;
+  min-height: 240px;
+  max-width: 240px;
+  max-height: 240px;
+  margin: 0;
+}

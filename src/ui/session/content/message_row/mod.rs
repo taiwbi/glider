@@ -335,9 +335,7 @@ impl Row {
             };
 
             match message_.content().0 {
-                // FIXME: Re-enable MessageVideo when
-                // https://github.com/paper-plane-developers/paper-plane/issues/410 is fixed
-                MessageAnimation(_) /*| MessageContent::MessageVideo(_)*/ => {
+                MessageAnimation(_) | MessageVideo(_) | MessageVideoNote(_) => {
                     self.update_specific_content::<_, ui::MessageVideo>(message_);
                 }
                 MessageAnimatedEmoji(data)

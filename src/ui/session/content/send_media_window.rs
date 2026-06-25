@@ -43,14 +43,21 @@ mod imp {
                 "send-media-window.send-message",
                 None,
                 |widget, _, _| async move {
-                    widget.send_message(false).await;
+                    widget.send_message(false, false).await;
                 },
             );
             klass.install_action_async(
                 "send-media-window.send-as-file",
                 None,
                 |widget, _, _| async move {
-                    widget.send_message(true).await;
+                    widget.send_message(true, false).await;
+                },
+            );
+            klass.install_action_async(
+                "send-media-window.send-as-video-note",
+                None,
+                |widget, _, _| async move {
+                    widget.send_message(false, true).await;
                 },
             );
         }
@@ -127,7 +134,25 @@ impl SendMediaWindow {
             .build();
         let imp = obj.imp();
 
-        imp.picture.set_filename(Some(&path));
+        let path_lower = path.to_lowercase();
+        let is_video = path_lower.ends_with(".mp4")
+            || path_lower.ends_with(".mkv")
+            || path_lower.ends_with(".avi")
+            || path_lower.ends_with(".mov")
+            || path_lower.ends_with(".webm");
+
+        if is_video {
+            obj.set_title(Some(&gettextrs::gettext("Send Video")));
+            let media = gtk::MediaFile::for_filename(&path);
+            media.set_muted(true);
+            media.set_loop(true);
+            media.play();
+            imp.picture.set_paintable(Some(&media));
+        } else {
+            obj.set_title(Some(&gettextrs::gettext("Send Image")));
+            imp.picture.set_filename(Some(&path));
+        }
+
         imp.caption_entry.set_chat(Some(chat.clone()));
 
         imp.chat.set(Some(chat));
@@ -154,7 +179,7 @@ impl SendMediaWindow {
         emoji_chooser.as_ref().unwrap().popup();
     }
 
-    async fn send_message(&self, send_as_file: bool) {
+    async fn send_message(&self, send_as_file: bool, send_as_video_note: bool) {
         use tdlib::enums::*;
         use tdlib::types::*;
 
@@ -162,7 +187,14 @@ impl SendMediaWindow {
 
         let path = imp.path.get().unwrap().clone();
         let caption = imp.caption_entry.as_markdown().await;
-        let file = InputFile::Local(InputFileLocal { path });
+        let file = InputFile::Local(InputFileLocal { path: path.clone() });
+
+        let path_lower = path.to_lowercase();
+        let is_video = path_lower.ends_with(".mp4")
+            || path_lower.ends_with(".mkv")
+            || path_lower.ends_with(".avi")
+            || path_lower.ends_with(".mov")
+            || path_lower.ends_with(".webm");
 
         let content = if send_as_file {
             InputMessageContent::InputMessageDocument(InputMessageDocument {
@@ -171,15 +203,52 @@ impl SendMediaWindow {
                 disable_content_type_detection: true,
                 caption,
             })
+        } else if send_as_video_note {
+            let paintable = imp.picture.paintable().unwrap();
+            let width = paintable.intrinsic_width();
+            let height = paintable.intrinsic_height();
+            let width = if width <= 0 { 480 } else { width };
+            let height = if height <= 0 { 480 } else { height };
+            let length = std::cmp::min(width, height);
+
+            InputMessageContent::InputMessageVideoNote(InputMessageVideoNote {
+                video_note: file,
+                thumbnail: None,
+                duration: 0,
+                length,
+            })
+        } else if is_video {
+            let paintable = imp.picture.paintable().unwrap();
+            let width = paintable.intrinsic_width();
+            let height = paintable.intrinsic_height();
+            let width = if width <= 0 { 480 } else { width };
+            let height = if height <= 0 { 480 } else { height };
+
+            InputMessageContent::InputMessageVideo(InputMessageVideo {
+                video: file,
+                thumbnail: None,
+                added_sticker_file_ids: vec![],
+                duration: 0,
+                width,
+                height,
+                caption,
+                self_destruct_type: None,
+                has_spoiler: false,
+                supports_streaming: true,
+            })
         } else {
             let paintable = imp.picture.paintable().unwrap();
+            let width = paintable.intrinsic_width();
+            let height = paintable.intrinsic_height();
+            let width = if width <= 0 { 480 } else { width };
+            let height = if height <= 0 { 480 } else { height };
 
             InputMessageContent::InputMessagePhoto(InputMessagePhoto {
                 photo: file,
                 thumbnail: None,
                 added_sticker_file_ids: vec![],
-                width: paintable.intrinsic_width(),
-                height: paintable.intrinsic_height(),
+                width,
+                height,
                 caption,
                 self_destruct_type: None,
                 has_spoiler: false,

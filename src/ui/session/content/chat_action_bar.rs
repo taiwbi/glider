@@ -21,6 +21,7 @@ use crate::ui;
 use crate::utils;
 
 const PHOTO_MIME_TYPES: &[&str] = &["image/png", "image/jpeg"];
+const VIDEO_MIME_TYPES: &[&str] = &["video/mp4", "video/ogg", "video/webm", "video/quicktime", "video/x-matroska"];
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 enum ChatActionBarState {
@@ -485,8 +486,11 @@ impl ChatActionBar {
         let filters = gio::ListStore::new::<gtk::FileFilter>();
         let parent = self.root().and_downcast::<gtk::Window>().unwrap();
 
-        filter.set_name(Some(&gettext("Images")));
+        filter.set_name(Some(&gettext("Images & Videos")));
         for mime in PHOTO_MIME_TYPES {
+            filter.add_mime_type(mime);
+        }
+        for mime in VIDEO_MIME_TYPES {
             filter.add_mime_type(mime);
         }
 

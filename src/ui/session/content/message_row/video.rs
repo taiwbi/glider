@@ -122,6 +122,13 @@ impl MessageVideo {
     ) {
         let imp = self.imp();
 
+        let is_video_note = matches!(content, tdlib::enums::MessageContent::MessageVideoNote(_));
+        if is_video_note {
+            imp.message_bubble.add_css_class("video-note");
+        } else {
+            imp.message_bubble.remove_css_class("video-note");
+        }
+
         let (caption, file, aspect_ratio, minithumbnail) =
             if let tdlib::enums::MessageContent::MessageAnimation(data) = content {
                 imp.indicator.set_label("GIF");
@@ -140,6 +147,15 @@ impl MessageVideo {
                     data.video.video,
                     data.video.width as f64 / data.video.height as f64,
                     data.video.minithumbnail,
+                )
+            } else if let tdlib::enums::MessageContent::MessageVideoNote(data) = content {
+                self.update_remaining_time(data.video_note.duration as i64);
+                imp.is_animation.set(false);
+                (
+                    tdlib::types::FormattedText { text: String::new(), entities: vec![] },
+                    data.video_note.video,
+                    1.0,
+                    data.video_note.minithumbnail,
                 )
             } else {
                 unreachable!();
