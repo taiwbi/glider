@@ -203,7 +203,7 @@ impl Code {
     }
 
     pub(crate) fn focus_entry_row(&self) {
-        glib::idle_add_local_once(clone!(@weak self as obj => move || {
+        glib::idle_add_local_once(clone!(#[weak(rename_to = obj)] self, move || {
             obj.imp().entry_row.grab_focus();
         }));
     }

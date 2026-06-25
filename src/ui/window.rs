@@ -52,7 +52,7 @@ mod imp {
             obj.client_manager_view()
                 .client_manager()
                 .connect_update_notification_group(
-                    clone!(@weak obj => move |_, notification_group, session| {
+                    clone!(#[weak] obj, move |_, notification_group, session| {
                         obj.handle_notifications(notification_group, session);
                     }),
                 );
@@ -110,7 +110,8 @@ mod imp {
 
 glib::wrapper! {
     pub(crate) struct Window(ObjectSubclass<imp::Window>)
-        @extends gtk::Widget, gtk::Window, gtk::ApplicationWindow, adw::ApplicationWindow;
+        @extends gtk::Widget, gtk::Window, gtk::ApplicationWindow, adw::ApplicationWindow,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager, gio::ActionMap, gio::ActionGroup;
 }
 
 impl Window {
@@ -184,7 +185,7 @@ impl Window {
 
                         let file_id = avatar_file.id;
                         utils::spawn(
-                            clone!(@weak self as obj, @weak session, @weak app => async move {
+                            clone!(#[weak(rename_to = obj)] self, #[weak] session, #[weak] app, async move {
                                 match session.download_file(file_id).await {
                                     Ok(file) => {
                                         let texture = gdk::Texture::from_filename(file.local.path)

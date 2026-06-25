@@ -1,11 +1,11 @@
 {
     "id": "app.drey.PaperPlane.Devel",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "46",
+    "runtime-version": "50",
     "sdk": "org.gnome.Sdk",
     "sdk-extensions": [
         "org.freedesktop.Sdk.Extension.rust-stable",
-        "org.freedesktop.Sdk.Extension.llvm16"
+        "org.freedesktop.Sdk.Extension.llvm20"
     ],
     "command": "paper-plane",
     "finish-args": [
@@ -18,13 +18,10 @@
         "--env=RUST_BACKTRACE=1"
     ],
     "build-options": {
-        "append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm16/bin:/app/bin",
+        "append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin:/app/bin",
         "env": {
             "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
-            "CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER": "clang",
-            "CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS": "-C link-arg=-fuse-ld=/usr/lib/sdk/rust-stable/bin/mold",
-            "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER": "clang",
-            "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS": "-C link-arg=-fuse-ld=/usr/lib/sdk/rust-stable/bin/mold"
+            "LIBCLANG_PATH": "/usr/lib/sdk/llvm20/lib"
         },
         "build-args": [
             "--share=network"
@@ -47,7 +44,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://github.com/paper-plane-developers/rlottie",
+                    "url": "https://github.com/taiwbi/rlottie",
                     "branch": "main"
                 }
             ]
@@ -58,8 +55,8 @@
             "sources": [
                 {
                     "type": "archive",
-                    "url": "https://gitlab.gnome.org/jwestman/blueprint-compiler/-/archive/v0.8.1/blueprint-compiler-v0.8.1.tar.gz",
-                    "sha256": "9207697cfac6e87a3c0ccf463be1a95c3bd06aa017c966a7e352ad5bc486cf3c"
+                    "url": "https://gitlab.gnome.org/GNOME/blueprint-compiler/-/archive/v0.20.4/blueprint-compiler-v0.20.4.tar.gz",
+                    "sha256": "6f0f72fbce0919045047f30b56590e71cd82c66b890c37fe765a40494fd34feb"
                 }
             ]
         },
@@ -78,7 +75,7 @@
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/gtk.git",
-                    "tag": "4.14.4"
+                    "tag": "4.22.4"
                 },
                 {
                     "type": "patch",
@@ -146,13 +143,14 @@
                 "-Dgir=false",
                 "-Dvapi=false",
                 "-Dgtk_doc=false",
-                "-Dsysprof=disabled"
+                "-Dsysprof=disabled",
+                "-Dvector_renderer=false"
             ],
             "sources": [
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/libshumate/",
-                    "tag": "1.1.4"
+                    "tag": "1.4.1"
                 }
             ]
         },
@@ -161,7 +159,10 @@
             "buildsystem": "meson",
             "run-tests": true,
             "config-opts": [
-                "-Dprofile=development"
+                "-Dprofile=development",
+                "--libdir=lib",
+                "-Dtg_api_id=24494788",
+                "-Dtg_api_hash=6aeb994d32ae02a7d94c3408d01254b8"
             ],
             "sources": [
                 {

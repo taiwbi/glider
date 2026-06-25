@@ -203,7 +203,7 @@ mod imp {
                 .set_orientation(gtk::Orientation::Vertical);
 
             self.message_entry.connect_formatted_text_notify(
-                clone!(@weak obj => move |message_entry, _| {
+                clone!(#[weak] obj, move |message_entry, _| {
                     // Enable the send-message action only when the message entry contains
                     // at least one non-whitespace character
                     let should_enable = message_entry
@@ -213,19 +213,19 @@ mod imp {
                     obj.action_set_enabled("chat-action-bar.send-message", should_enable);
 
                     // Send typing action
-                    utils::spawn(clone!(@weak obj => async move {
+                    utils::spawn(clone!(#[weak] obj, async move {
                         obj.send_chat_action(tdlib::enums::ChatAction::Typing).await;
                     }));
                 }),
             );
 
             self.message_entry
-                .connect_paste_clipboard(clone!(@weak obj => move |_| {
+                .connect_paste_clipboard(clone!(#[weak] obj, move |_| {
                     obj.handle_paste_action();
                 }));
 
             self.message_entry
-                .connect_emoji_button_press(clone!(@weak obj => move |_, button| {
+                .connect_emoji_button_press(clone!(#[weak] obj, move |_, button| {
                     obj.show_emoji_chooser(&button);
                 }));
 
@@ -234,7 +234,7 @@ mod imp {
             obj.action_set_enabled("chat-action-bar.send-message", false);
 
             self.message_entry
-                .connect_activate(clone!(@weak obj => move |_| {
+                .connect_activate(clone!(#[weak] obj, move |_| {
                     obj.activate_action("chat-action-bar.send-message", None).unwrap()
                 }));
 
@@ -255,7 +255,8 @@ mod imp {
 
 glib::wrapper! {
     pub(crate) struct ChatActionBar(ObjectSubclass<imp::ChatActionBar>)
-        @extends gtk::Widget;
+        @extends gtk::Widget,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Default for ChatActionBar {
@@ -275,13 +276,13 @@ impl ChatActionBar {
         let chat_signal_group = glib::SignalGroup::new::<model::Chat>();
         chat_signal_group.connect_notify_local(
             Some("notification-settings"),
-            clone!(@weak self as obj => move |_, _| {
+            clone!(#[weak(rename_to = obj)] self, move |_, _| {
                 obj.update_stack_page();
             }),
         );
         chat_signal_group.connect_notify_local(
             Some("block-list"),
-            clone!(@weak self as obj => move |_, _| {
+            clone!(#[weak(rename_to = obj)] self, move |_, _| {
                 obj.update_stack_page();
             }),
         );
@@ -290,7 +291,7 @@ impl ChatActionBar {
         let basic_group_signal_group = glib::SignalGroup::new::<model::BasicGroup>();
         basic_group_signal_group.connect_notify_local(
             Some("status"),
-            clone!(@weak self as obj => move |_, _| {
+            clone!(#[weak(rename_to = obj)] self, move |_, _| {
                 obj.update_stack_page();
             }),
         );
@@ -301,7 +302,7 @@ impl ChatActionBar {
         let supergroup_signal_group = glib::SignalGroup::new::<model::Supergroup>();
         supergroup_signal_group.connect_notify_local(
             Some("status"),
-            clone!(@weak self as obj => move |_, _| {
+            clone!(#[weak(rename_to = obj)] self, move |_, _| {
                 obj.update_stack_page();
             }),
         );
@@ -467,10 +468,10 @@ impl ChatActionBar {
         if emoji_chooser.is_none() {
             let chooser = gtk::EmojiChooser::new();
             chooser.set_parent(parent);
-            chooser.connect_emoji_picked(clone!(@weak self as obj => move |_, emoji| {
+            chooser.connect_emoji_picked(clone!(#[weak(rename_to = obj)] self, move |_, emoji| {
                 obj.imp().message_entry.insert_at_cursor(emoji);
             }));
-            chooser.connect_hide(clone!(@weak self as obj => move |_| {
+            chooser.connect_hide(clone!(#[weak(rename_to = obj)] self, move |_| {
                 obj.imp().message_entry.grab_focus();
             }));
             *emoji_chooser = Some(chooser);
@@ -663,7 +664,7 @@ impl ChatActionBar {
             if result.is_ok() {
                 glib::timeout_add_seconds_local_once(
                     5,
-                    clone!(@weak self as obj =>move || {
+                    clone!(#[weak(rename_to = obj)] self, move || {
                         obj.imp().chat_action_in_cooldown.set(false);
                     }),
                 );
@@ -675,7 +676,7 @@ impl ChatActionBar {
 
     pub(crate) fn handle_paste_action(&self) {
         if let Some(chat) = self.chat() {
-            utils::spawn(clone!(@weak self as obj => async move {
+            utils::spawn(clone!(#[weak(rename_to = obj)] self, async move {
                 if let Err(e) = obj.handle_image_clipboard(chat).await {
                     log::warn!("Error on pasting an image: {:?}", e);
                 }
@@ -719,7 +720,7 @@ impl ChatActionBar {
             return;
         }
 
-        utils::spawn(clone!(@weak self as obj => async move {
+        utils::spawn(clone!(#[weak(rename_to = obj)] self, async move {
             obj.save_message_as_draft().await;
         }));
 

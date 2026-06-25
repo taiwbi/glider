@@ -108,7 +108,8 @@ mod imp {
 
 glib::wrapper! {
     pub(crate) struct ChatInfoWindow(ObjectSubclass<imp::ChatInfoWindow>)
-        @extends gtk::Widget, gtk::Window, adw::Window;
+        @extends gtk::Widget, gtk::Window, adw::Window,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
 impl ChatInfoWindow {
@@ -199,7 +200,7 @@ impl ChatInfoWindow {
         self.update_info_list_visibility();
 
         // Full info
-        utils::spawn(clone!(@weak self as obj => async move {
+        utils::spawn(clone!(#[weak(rename_to = obj)] self, async move {
             let result = tdlib::functions::get_basic_group_full_info(basic_group_id, client_id).await;
             match result {
                 Ok(tdlib::enums::BasicGroupFullInfo::BasicGroupFullInfo(full_info)) => {
@@ -255,7 +256,7 @@ impl ChatInfoWindow {
         self.update_info_list_visibility();
 
         // Full info
-        utils::spawn(clone!(@weak self as obj => async move {
+        utils::spawn(clone!(#[weak(rename_to = obj)] self, async move {
             let result = tdlib::functions::get_supergroup_full_info(supergroup_id, client_id).await;
             match result {
                 Ok(tdlib::enums::SupergroupFullInfo::SupergroupFullInfo(full_info)) => {
@@ -288,7 +289,7 @@ impl ChatInfoWindow {
 
     fn make_row_copyable(&self, action_row: &adw::ActionRow) {
         action_row.set_activatable(true);
-        action_row.connect_activated(clone!(@weak self as obj => move |action_row| {
+        action_row.connect_activated(clone!(#[weak(rename_to = obj)] self, move |action_row| {
             action_row.clipboard().set_text(&action_row.title());
 
             let toast = adw::Toast::new(&gettext("Copied to clipboard"));

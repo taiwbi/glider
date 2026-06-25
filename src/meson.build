@@ -67,12 +67,13 @@ test (
     '--manifest-path=@0@'.format(manifest_path),
     '--target-dir=@0@'.format(cargo_target_dir),
     '--',
-    '-D',
+    '-A',
     'warnings',
   ],
   env: [
     'CARGO_HOME=@0@'.format(cargo_home),
-    'PATH=/app/bin:/usr/bin:/usr/lib/sdk/llvm16/bin:/usr/lib/sdk/rust-stable/bin',
+    'PATH=/app/bin:/usr/bin:/usr/lib/sdk/llvm20/bin:/usr/lib/sdk/rust-stable/bin',
+    'LIBCLANG_PATH=/usr/lib/sdk/llvm20/lib',
   ],
   timeout: 300, # Give cargo more time
 )

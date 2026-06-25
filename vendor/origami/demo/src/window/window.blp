@@ -1,0 +1,91 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $SpoilerWindow: Adw.ApplicationWindow {
+    height-request: 400;
+    default-height: 580;
+    default-width: 840;
+
+    Adw.Leaflet leaflet {
+        hexpand: true;
+        vexpand: true;
+
+        Box {
+            orientation: vertical;
+            vexpand: true;
+
+            Adw.HeaderBar {
+                show-end-title-buttons: bind leaflet.folded;
+
+                [title]
+                Adw.WindowTitle {
+                    title: "Origami Demo";
+                }
+            }
+
+            StackSidebar {
+                vexpand: true;
+                width-request: 270;
+                stack: stack;
+            }
+        }
+
+        Separator {
+            orientation: vertical;
+        }
+
+        Box {
+            orientation: vertical;
+            vexpand: true;
+
+            Adw.HeaderBar {
+                [title]
+                Adw.Bin {}
+
+                show-start-title-buttons: bind leaflet.folded;
+            }
+
+            Stack stack {
+                hexpand: true;
+
+                StackPage {
+                    name: "welcome";
+                    title: "Welcome";
+
+                    child: Adw.StatusPage {
+                        vexpand: true;
+                        title: "Welcome to Origami Demo";
+                    };
+                }
+
+                StackPage {
+                    name: "spoiler";
+                    title: "Spoiler";
+
+                    child: $OriDemoSpoilerPage {};
+                }
+
+                StackPage {
+                    name: "loading_indicator";
+                    title: "Loading Indicator";
+
+                    child: $OriDemoLoadingIndicatorPage {};
+                }
+
+                StackPage {
+                    name: "shimmer_effect";
+                    title: "Shimmer Effect";
+
+                    child: $OriDemoShimmerEffectPage {};
+                }
+
+                StackPage {
+                    name: "gradient_bg";
+                    title: "Gradient Background";
+
+                    child: $OriDemoGradientBgPage {};
+                }
+            }
+        }
+    }
+}

@@ -124,7 +124,8 @@ mod imp {
 
 glib::wrapper! {
     pub(crate) struct Search(ObjectSubclass<imp::Search>)
-        @extends gtk::Widget;
+        @extends gtk::Widget,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 #[gtk::template_callbacks]
@@ -133,7 +134,7 @@ impl Search {
         let imp = self.imp();
         if imp.search_entry.text().is_empty() {
             // Update recently found chats
-            utils::spawn(clone!(@weak self as obj => async move {
+            utils::spawn(clone!(#[weak(rename_to = obj)] self, async move {
                 obj.search().await;
             }));
         } else {
@@ -166,7 +167,7 @@ impl Search {
         const MAX_KNOWN_CHATS: i32 = 50;
 
         imp.selection.set_model(Some(&list));
-        list.connect_items_changed(clone!(@weak self as obj => move |list, _, _, _| {
+        list.connect_items_changed(clone!(#[weak(rename_to = obj)] self, move |list, _, _, _| {
             obj.imp().stack.set_visible_child_name(if list.n_items() > 0 {
                 "results"
             } else {

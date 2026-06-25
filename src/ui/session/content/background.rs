@@ -90,7 +90,7 @@ mod imp {
             let style_manager = adw::StyleManager::default();
             obj.set_theme(hard_coded_themes(style_manager.is_dark()));
 
-            style_manager.connect_dark_notify(clone!(@weak obj => move |style_manager| {
+            style_manager.connect_dark_notify(clone!(#[weak] obj, move |style_manager| {
                 obj.set_theme(hard_coded_themes(style_manager.is_dark()))
             }));
 
@@ -98,7 +98,7 @@ mod imp {
                 obj.add_css_class("fallback");
             }
 
-            style_manager.connect_high_contrast_notify(clone!(@weak obj => move |style_manager| {
+            style_manager.connect_high_contrast_notify(clone!(#[weak] obj, move |style_manager| {
                 if style_manager.is_high_contrast() {
                     obj.add_css_class("fallback");
                 } else if obj.imp().shader.borrow().is_some() {
@@ -106,7 +106,7 @@ mod imp {
                 }
             }));
 
-            let target = adw::CallbackAnimationTarget::new(clone!(@weak obj => move |progress| {
+            let target = adw::CallbackAnimationTarget::new(clone!(#[weak] obj, move |progress| {
                 let imp = obj.imp();
                 imp.gradient_texture.take();
                 let progress = progress as f32;
@@ -291,7 +291,8 @@ mod imp {
 
 glib::wrapper! {
     pub(crate) struct Background(ObjectSubclass<imp::Background>)
-        @extends gtk::Widget, adw::Bin;
+        @extends gtk::Widget, adw::Bin,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Background {

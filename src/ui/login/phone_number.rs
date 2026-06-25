@@ -117,7 +117,7 @@ mod imp {
                         .is_empty(),
                 );
 
-                utils::spawn(clone!(@weak obj, @weak model => async move {
+                utils::spawn(clone!(#[weak] obj, #[weak] model, async move {
                     if let Err(e) = model.load_country_codes().await {
                         utils::show_toast(
                             &obj,
@@ -239,7 +239,7 @@ impl PhoneNumber {
         self.freeze(true, false);
     }
     pub(crate) fn focus_input(&self) {
-        glib::idle_add_local_once(clone!(@weak self as obj => move || {
+        glib::idle_add_local_once(clone!(#[weak(rename_to = obj)] self, move || {
             obj.imp().input.select_number_without_calling_code();
         }));
     }

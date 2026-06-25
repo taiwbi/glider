@@ -67,7 +67,7 @@ mod imp {
 
             self.avatar.connect_notify_local(
                 Some("item"),
-                clone!(@weak obj => move |_, _| {
+                clone!(#[weak] obj, move |_, _| {
                     obj.notify("user");
                 }),
             );
@@ -87,7 +87,8 @@ mod imp {
 
 glib::wrapper! {
     pub(crate) struct AvatarMapMarker(ObjectSubclass<imp::AvatarMapMarker>)
-        @extends gtk::Widget;
+        @extends gtk::Widget,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl From<&model::User> for AvatarMapMarker {

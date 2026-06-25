@@ -121,10 +121,7 @@ mod imp {
             let combo_row_handler = Rc::new(RefCell::new(None));
             let entry_handler = Rc::new(RefCell::new(None));
 
-            combo_row_handler.replace(Some(self.combo_row.connect_selected_item_notify(clone!(
-                @weak obj,
-                @strong entry_handler,
-                => move |combo_row|
+            combo_row_handler.replace(Some(self.combo_row.connect_selected_item_notify(clone!(#[weak] obj, #[strong] entry_handler, move |combo_row|
             {
                 combo_row.set_subtitle("");
 
@@ -170,10 +167,7 @@ mod imp {
             }))));
 
             // Format the phone number and reset the cursor.
-            entry_handler.replace(Some(self.entry_row.connect_changed(clone!(
-                @weak obj,
-                @strong combo_row_handler,
-                => move |_|
+            entry_handler.replace(Some(self.entry_row.connect_changed(clone!(#[weak] obj, #[strong] combo_row_handler, move |_|
             {
                 if let Some(ref model) = obj.model() {
                     let imp = obj.imp();
@@ -217,13 +211,11 @@ mod imp {
             // We give focus the the phone number entry as soon as the user has selected an country
             // from the combo box.
             let focus_events = gtk::EventControllerFocus::new();
-            focus_events.connect_leave(clone!(@weak obj => move |_| {
+            focus_events.connect_leave(clone!(#[weak] obj, move |_| {
                 // We need to set the cursor position at the end on the next idle.
-                glib::idle_add_local_once(clone!(
-                    @weak obj => move || {
+                glib::idle_add_local_once(clone!(#[weak] obj, move || {
                         obj.imp().entry_row.set_position(i32::MAX);
-                    }
-                ));
+                    }));
             }));
             self.combo_row.add_controller(focus_events);
         }

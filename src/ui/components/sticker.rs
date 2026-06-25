@@ -91,7 +91,8 @@ mod imp {
 
 glib::wrapper! {
     pub(crate) struct Sticker(ObjectSubclass<imp::Sticker>)
-        @extends gtk::Widget;
+        @extends gtk::Widget,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl Sticker {
@@ -116,7 +117,7 @@ impl Sticker {
 
         let format = sticker.format;
 
-        utils::spawn(clone!(@weak self as obj, @weak session => async move {
+        utils::spawn(clone!(#[weak(rename_to = obj)] self, #[weak] session, async move {
                 if sticker.sticker.local.is_downloading_completed {
                     obj.load_sticker(sticker.sticker.local.path, file_id, looped, format).await;
                 } else {

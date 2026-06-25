@@ -94,7 +94,8 @@ mod imp {
 
 glib::wrapper! {
     pub(crate) struct MessageIndicators(ObjectSubclass<imp::MessageIndicators>)
-        @extends gtk::Widget;
+        @extends gtk::Widget,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl MessageIndicators {
@@ -104,7 +105,7 @@ impl MessageIndicators {
         let message_signal_group = glib::SignalGroup::new::<model::Message>();
         message_signal_group.connect_notify_local(
             Some("is-edited"),
-            clone!(@weak self as obj => move |_, _| {
+            clone!(#[weak(rename_to = obj)] self, move |_, _| {
                 obj.update_message_info();
             }),
         );
@@ -114,7 +115,7 @@ impl MessageIndicators {
             glib::SignalGroup::new::<model::MessageInteractionInfo>();
         interaction_info_signal_group.connect_notify_local(
             Some("reply-count"),
-            clone!(@weak self as obj => move |_, _| {
+            clone!(#[weak(rename_to = obj)] self, move |_, _| {
                 obj.update_reply_count();
             }),
         );
@@ -125,7 +126,7 @@ impl MessageIndicators {
         let chat_signal_group = glib::SignalGroup::new::<model::Chat>();
         chat_signal_group.connect_notify_local(
             Some("last-read-outbox-message-id"),
-            clone!(@weak self as obj => move |_, _| {
+            clone!(#[weak(rename_to = obj)] self, move |_, _| {
                 obj.update_sending_state();
             }),
         );
